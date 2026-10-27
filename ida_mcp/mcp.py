@@ -830,6 +830,38 @@ def reference(
     return lookup_reference(query)
 
 
+@tool(title="Get stored pseudo-C", read_only=True)
+def get_pseudo(
+    target: Annotated[str, "Function name or any address inside it (0x...)."],
+    depth: Annotated[int, "Also return callees up to this depth (0 = only the function)."] = 0,
+    max_chars: Annotated[int, "Output size cap."] = 60000,
+    db: Annotated[str | None, "Path to the pseudo .db; defaults to IDA_MCP_PSEUDO_DB."] = None,
+) -> str:
+    """Instantly return pre-decompiled Hex-Rays pseudo-C from a compressed store
+    built ahead of time. Needs no open IDA database. Prefer this over decompiling
+    with execute_python.
+    """
+
+    from . import pseudo_store
+
+    return pseudo_store.get_pseudo(target, depth, max_chars, db)
+
+
+@tool(title="Search stored pseudo-C", read_only=True)
+def search_pseudo(
+    pattern: Annotated[str, "Case-insensitive regex matched against function names and pseudo-C lines."],
+    limit: Annotated[int, "Max matching functions."] = 20,
+    db: Annotated[str | None, "Path to the pseudo .db; defaults to IDA_MCP_PSEUDO_DB."] = None,
+) -> str:
+    """Regex search over every stored pseudo-C function (names and code). Returns
+    address, name and the first matching line. Then use get_pseudo on a hit.
+    """
+
+    from . import pseudo_store
+
+    return pseudo_store.search_pseudo(pattern, limit, db)
+
+
 def _get_idausr_dir() -> Path:
     """Return IDA's primary user directory for plugin discovery."""
     idausr = os.environ.get("IDAUSR")
