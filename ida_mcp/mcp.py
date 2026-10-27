@@ -834,7 +834,7 @@ def reference(
 def get_pseudo(
     target: Annotated[str, "Function name or any address inside it (0x...)."],
     depth: Annotated[int, "Also return callees up to this depth (0 = only the function)."] = 0,
-    max_chars: Annotated[int, "Output size cap."] = 60000,
+    max_chars: Annotated[int, "Output size cap."] = 1_073_741_824,
     db: Annotated[str | None, "Path to the pseudo .db; defaults to IDA_MCP_PSEUDO_DB."] = None,
 ) -> str:
     """Instantly return pre-decompiled Hex-Rays pseudo-C from a compressed store
