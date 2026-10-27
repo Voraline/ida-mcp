@@ -72,7 +72,7 @@ def _fmt(row, decode):
     return f"//==== {name} @ {ea:#x} size={size} ====\n// callers: {callers or '-'}\n// callees: {callees or '-'}\n{body}"
 
 
-def get_pseudo(target, depth=0, max_chars=60000, db=None):
+def get_pseudo(target, depth=0, max_chars=1_073_741_824, db=None):
     con = _open(db)
     try:
         root = _resolve(con, target)
