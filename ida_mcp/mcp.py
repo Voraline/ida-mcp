@@ -90,8 +90,8 @@ from ida_nexus import (
 from zeromcp import McpServer, McpToolError
 
 SESSIONS_DIR = get_mcp_state_dir() / "sessions"
-OPEN_TIMEOUT_SECONDS = 300
-EXECUTE_TIMEOUT_SECONDS = 360
+OPEN_TIMEOUT_SECONDS = 30000
+EXECUTE_TIMEOUT_SECONDS = 36000
 
 
 def _mcp_idle_timeout_from_environment() -> float | None:
