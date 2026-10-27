@@ -832,14 +832,22 @@ def reference(
 
 @tool(title="Get stored pseudo-C", read_only=True)
 def get_pseudo(
-    target: Annotated[str, "Function name or any address inside it (0x...)."],
-    depth: Annotated[int, "Also return callees up to this depth (0 = only the function)."] = 0,
+    target: Annotated[
+        str | list[str],
+        "Function name or any address inside it (0x...), or a list of them to fetch several "
+        "functions in one call. Use a list, not a comma-separated string: C++ names can contain commas.",
+    ],
+    depth: Annotated[
+        int,
+        "Also return callees up to this depth (0 = only the function). Use 1 to see what a "
+        "function calls, 2+ to trace a whole feature.",
+    ] = 1,
     max_chars: Annotated[int, "Output size cap."] = 1_073_741_824,
     db: Annotated[str | None, "Path to the pseudo .db; defaults to IDA_MCP_PSEUDO_DB."] = None,
 ) -> str:
     """Instantly return pre-decompiled Hex-Rays pseudo-C from a compressed store
     built ahead of time. Needs no open IDA database. Prefer this over decompiling
-    with execute_python.
+    with execute_python. Accepts one target or a list of targets (batch).
     """
 
     from . import pseudo_store

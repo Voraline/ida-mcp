@@ -73,31 +73,45 @@ def _fmt(row, decode):
 
 
 def get_pseudo(target, depth=0, max_chars=1_073_741_824, db=None):
+    """target: one function name/address, or a list of them. All targets share one
+    max_chars budget and one de-duplication set; each target's callees (up to
+    depth) follow that target's own block."""
+    if isinstance(target, (list, tuple)):
+        targets = [str(t) for t in target]
+    else:
+        targets = [str(target)]
+    if not targets:
+        return "no targets given"
     con = _open(db)
     try:
-        root = _resolve(con, target)
-        if not root:
-            return f"not found: {target}"
         seen, out, total = set(), [], 0
-        todo = [(root, 0)]
-        while todo:
-            row, d = todo.pop(0)
-            if row[0] in seen:
+        for i, t in enumerate(targets):
+            root = _resolve(con, t)
+            if not root:
+                out.append(f"not found: {t}")
                 continue
-            seen.add(row[0])
-            text = _fmt(row, con.decode)
-            if total + len(text) > max_chars:
-                out.append(f"// TRUNCATED at {max_chars} chars; call again for: {row[1]}")
-                break
-            out.append(text)
-            total += len(text)
-            if d < depth and row[3]:
-                for name in row[3].split(","):
-                    child = con.execute(
-                        "SELECT ea,name,size,callees,callers,code FROM funcs WHERE name=?", (name.strip(),)
-                    ).fetchone()
-                    if child:
-                        todo.append((child, d + 1))
+            todo = [(root, 0)]
+            while todo:
+                row, d = todo.pop(0)
+                if row[0] in seen:
+                    continue
+                seen.add(row[0])
+                text = _fmt(row, con.decode)
+                if total + len(text) > max_chars:
+                    out.append(f"// TRUNCATED at {max_chars} chars; call again for: {row[1]}")
+                    rest = targets[i + 1 :]
+                    if rest:
+                        out.append("// targets not returned (call again): " + ", ".join(rest))
+                    return "\n".join(out)
+                out.append(text)
+                total += len(text)
+                if d < depth and row[3]:
+                    for name in row[3].split(","):
+                        child = con.execute(
+                            "SELECT ea,name,size,callees,callers,code FROM funcs WHERE name=?", (name.strip(),)
+                        ).fetchone()
+                        if child:
+                            todo.append((child, d + 1))
         return "\n".join(out)
     finally:
         con.close()
