@@ -1,6 +1,6 @@
 [project]
 name = "ida-mcp"
-version = "20261023.0.2"
+version = "20261028.0.3"
 description = "Official Hex-Rays IDA MCP Server."
 readme = "README.md"
 license = "MIT"
@@ -8,7 +8,7 @@ license-files = ["LICENSE"]
 requires-python = ">=3.11"
 dependencies = [
     "packaging",
-    "ida-nexus>=0.14.1",
+    "ida-nexus>=0.14.2",
     "zeromcp>=1.10.3",
 ]
 
